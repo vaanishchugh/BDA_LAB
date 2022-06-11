@@ -1,0 +1,539 @@
+create keyspace students with replication={'class':'SimpleStrategy','replication_factor':1};
+cqlsh> describe keyspaces;
+
+students  system_schema  system_auth  system  system_distributed  system_traces
+
+cqlsh> select * from system.scchema_keyspaces;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="unconfigured table scchema_keyspaces"
+cqlsh> select * from system.schema_keyspaces;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="unconfigured table schema_keyspaces"
+cqlsh> select * from system.schema_keyspace;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="unconfigured table schema_keyspace"
+cqlsh> select * from students.schema_keyspaces;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="unconfigured table schema_keyspaces"
+cqlsh> SELECT * FROM system.schema_keyspaces;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="unconfigured table schema_keyspaces"
+cqlsh> use students;
+cqlsh:students> create table studentInfo(rollno int PRIMARY KEY,name text,doj timestamp,percentage double);
+cqlsh:students> describe tables;
+
+studentinfo
+
+cqlsh:students> describe table student_info;
+
+Column family 'student_info' not found
+cqlsh:students> describe table studentInfo;
+
+CREATE TABLE students.studentinfo (
+    rollno int PRIMARY KEY,
+    doj timestamp,
+    name text,
+    percentage double
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:students> describe table studentInfo pretty;
+Improper describe command.
+cqlsh:students> describe table studentInfo;
+
+CREATE TABLE students.studentinfo (
+    rollno int PRIMARY KEY,
+    doj timestamp,
+    name text,
+    percentage double
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:students> begin batch 
+            ... inset into studentInfo(rollno,name,doj,percentage)
+            ... values(1,'Harish','2022-06-15',99.05)
+            ... apply batch;
+SyntaxException: line 2:0 mismatched input 'inset' expecting K_APPLY (begin batch [inset]...)
+cqlsh:students> begin batch  insert into studentInfo(rollno,name,doj,percentage) values(1,'Harish','2022-06-15',99.05) apply batch;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name   | percentage
+--------+---------------------------------+--------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 | Harish |      99.05
+
+(1 rows)
+cqlsh:students> begin batch  insert into studentInfo(rollno,name,doj,percentage) values(2,'Arish Siddique','2021-06-15',90.05) apply batch;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |      90.05
+
+(2 rows)
+cqlsh:students> begin batch  insert into studentInfo(rollno,name,doj,percentage) values(2,'Arish Siddique','2021-06-15',90.05) apply batch;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |      90.05
+
+(2 rows)
+cqlsh:students> begin batch  insert into studentInfo(rollno,name,doj,percentage) values(2,'Arish Siddique','2021-06-15',90.5) apply batch;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+
+(2 rows)
+cqlsh:students> begin batch  insert into studentInfo(rollno,name,doj,percentage) values(3,'Rohan','2021-06-15',69.5) apply batch;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+      3 | 2021-06-14 18:30:00.000000+0000 |          Rohan |       69.5
+
+(3 rows)
+cqlsh:students> begin batch  insert into studentInfo(rollno,name,doj,percentage) values(4,'Harris','2023-06-15',97) apply batch;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |         Harris |         97
+      3 | 2021-06-14 18:30:00.000000+0000 |          Rohan |       69.5
+
+(4 rows)
+cqlsh:students> select * from studentInfo where rollno in (1,2,4);
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |         Harris |         97
+
+(3 rows)
+cqlsh:students> select * from studentInfo where name = 'Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Cannot execute this query as it might involve data filtering and thus may have unpredictable performance. If you want to execute this query despite the performance unpredictability, use ALLOW FILTERING"
+cqlsh:students> create index on studentInfo(name);
+cqlsh:students> select * from studentInfo where name = 'Harish';
+
+ rollno | doj                             | name   | percentage
+--------+---------------------------------+--------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 | Harish |      99.05
+
+(1 rows)
+cqlsh:students> select * from studentInfo where name =='Harish';
+SyntaxException: line 1:38 no viable alternative at input '=' (... from studentInfo where name =[=]...)
+cqlsh:students> select * from studentInfo where name = 'Harish';
+
+ rollno | doj                             | name   | percentage
+--------+---------------------------------+--------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 | Harish |      99.05
+
+(1 rows)
+cqlsh:students> select * from studentInfo where name = 'Harris';
+
+ rollno | doj                             | name   | percentage
+--------+---------------------------------+--------+------------
+      4 | 2023-06-14 18:30:00.000000+0000 | Harris |         97
+
+(1 rows)
+cqlsh:students> select * from studentInfo limit 2;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |      99.05
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+
+(2 rows)
+cqlsh:students> update studentInfo set precentage=93 where name='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name precentage"
+cqlsh:students> update studentInfo set percentage=93 where name='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> update studentInfo set percentage= '93' where name='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Invalid STRING constant (93) for "percentage" of type double"
+cqlsh:students> update studentInfo set percentage= 93 where name='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> update studentInfo set percentage= 93.0 where name='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> update studentInfo set percentage= 93.0 where rollno=1;
+cqlsh:students> select * from studentInfo limit 2;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |         93
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+
+(2 rows)
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |         93
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |         Harris |         97
+      3 | 2021-06-14 18:30:00.000000+0000 |          Rohan |       69.5
+
+(4 rows)
+cqlsh:students> delete percentage from studentInfo where name='Harris';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> delete percentage from studentInfo where rollno=4;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | name           | percentage
+--------+---------------------------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |         Harish |         93
+      2 | 2021-06-14 18:30:00.000000+0000 | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |         Harris |       null
+      3 | 2021-06-14 18:30:00.000000+0000 |          Rohan |       69.5
+
+(4 rows)
+cqlsh:students> select * from studentInfo order by percentage;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:students> select * from studentInfo order rollno;
+SyntaxException: line 1:32 mismatched input 'rollno' expecting K_BY (select * from studentInfo order [rollno]...)
+cqlsh:students> select * from studentInfo order [rollno];
+SyntaxException: line 1:32 mismatched input '[' expecting K_BY (select * from studentInfo order [[]...)
+cqlsh:students> select * from studentInfo order by rollno;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="ORDER BY is only supported when the partition key is restricted by an EQ or an IN."
+cqlsh:students> select * from studentInfo where rollno in (1,2,3,4) order by rollno;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Order by is currently only supported on the clustered columns of the PRIMARY KEY, got rollno"
+cqlsh:students> alter studentInfo add hobbies set<text>;
+SyntaxException: line 1:6 no viable alternative at input 'studentInfo' ([alter] studentInfo...)
+cqlsh:students> alter table studentInfo add hobbies set<text>;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | hobbies | name           | percentage
+--------+---------------------------------+---------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 |    null |         Harish |         93
+      2 | 2021-06-14 18:30:00.000000+0000 |    null | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |    null |         Harris |       null
+      3 | 2021-06-14 18:30:00.000000+0000 |    null |          Rohan |       69.5
+
+(4 rows)
+cqlsh:students> update studentInfo set hobbies=hobbies+{"Football"} where rollno in (1,2,3);
+SyntaxException: line 1:50 no viable alternative at input '}' (update studentInfo set hobbies=hobbies+[{]"Football"}...)
+cqlsh:students> update studentInfo set hobbies=hobbies+{'Football'} where rollno in (1,2,3);
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | hobbies      | name           | percentage
+--------+---------------------------------+--------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |         null |         Harris |       null
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5
+
+(4 rows)
+cqlsh:students> update studentInfo set hobbies=hobbies+{'Cricket'} where rollno =4;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | hobbies      | name           | percentage
+--------+---------------------------------+--------------+----------------+------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5
+
+(4 rows)
+cqlsh:students> alter table studentInfo add subjects list<text>;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects
+--------+---------------------------------+--------------+----------------+------------+----------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 |     null
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |     null
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |     null
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 |     null
+
+(4 rows)
+cqlsh:students> update studentInfo set subjects=subjects+['English'] ;
+SyntaxException: line 1:53 mismatched input ';' expecting K_WHERE (...set subjects=subjects+['English'] [;])
+cqlsh:students> update studentInfo set subjects=subjects+['English'] where rollno in(1,2,3,4);
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects
+--------+---------------------------------+--------------+----------------+------------+-------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 | ['English']
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 | ['English']
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null | ['English']
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 | ['English']
+
+(4 rows)
+cqlsh:students> update studentInfo set subjects=subjects+['History'] where name ='Harris';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> create index on studentInfo(name);
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Index studentinfo_name_idx_1 is a duplicate of existing index studentinfo_name_idx"
+cqlsh:students> update studentInfo set subjects=subjects+['History'] where rollno=3;
+cqlsh:students> select * from studentInfo;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects
+--------+---------------------------------+--------------+----------------+------------+------------------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 |            ['English']
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |            ['English']
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |            ['English']
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 | ['English', 'History']
+
+(4 rows)
+cqlsh:students> select hobbies,subject from studentInfo;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name subject"
+cqlsh:students> select hobbies,subject from studentInfo where name='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name subject"
+cqlsh:students> select hobbies,subject from studentInfo where name ='Harish';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Undefined column name subject"
+cqlsh:students> create index on studentInfo(name);
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Index studentinfo_name_idx_1 is a duplicate of existing index studentinfo_name_idx"
+cqlsh:students> delete percentage from studentInfo where name='Harris';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> select * from studentInfo where name ='Harish';
+
+ rollno | doj                             | hobbies      | name   | percentage | subjects
+--------+---------------------------------+--------------+--------+------------+-------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} | Harish |         93 | ['English']
+
+(1 rows)
+cqlsh:students> select hobbies from studentInfo where name ='Harish';
+
+ hobbies
+--------------
+ {'Football'}
+
+(1 rows)
+cqlsh:students> select hobbies,subjects from studentInfo where name ='Harish';
+
+ hobbies      | subjects
+--------------+-------------
+ {'Football'} | ['English']
+
+(1 rows)
+cqlsh:students> update studentInfo set subjects=['Computer Science']+subjects where rollno=1;
+cqlsh:students> select * from studentInfo ;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects
+--------+---------------------------------+--------------+----------------+------------+---------------------------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 | ['Computer Science', 'English']
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |                     ['English']
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |                     ['English']
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 |          ['English', 'History']
+
+(4 rows)
+cqlsh:students> delete subjects[1] from studentInfo where name ='Harris';
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Some partition key parts are missing: rollno"
+cqlsh:students> delete subjects[1] from studentInfo where rollno=3;
+cqlsh:students> select * from studentInfo ;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects
+--------+---------------------------------+--------------+----------------+------------+---------------------------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 | ['Computer Science', 'English']
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |                     ['English']
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |                     ['English']
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 |                     ['English']
+
+(4 rows)
+cqlsh:students> alter table studentInfo add todo map<name,text>;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Non-frozen UDTs are not allowed inside collections: map<name, text>"
+cqlsh:students> alter table studentInfo add todo map <name,text>;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Non-frozen UDTs are not allowed inside collections: map<name, text>"
+cqlsh:students> alter table studentInfo add todo map<name,text>;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Non-frozen UDTs are not allowed inside collections: map<name, text>"
+cqlsh:students> alter table studentInfo add todo map<timeStamp,text>;
+cqlsh:students> select * from studentInfo ;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects                        | todo
+--------+---------------------------------+--------------+----------------+------------+---------------------------------+------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 | ['Computer Science', 'English'] | null
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |                     ['English'] | null
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |                     ['English'] | null
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 |                     ['English'] | null
+
+(4 rows)
+cqlsh:students> update studentInfo set todo={'2022-06-26':'Internship beg'} where rollno=1;
+cqlsh:students> select * from studentInfo ;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects                        | todo
+--------+---------------------------------+--------------+----------------+------------+---------------------------------+-------------------------------------------------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 | ['Computer Science', 'English'] | {'2022-06-25 18:30:00.000000+0000': 'Internship beg'}
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |                     ['English'] |                                                  null
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |                     ['English'] |                                                  null
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 |                     ['English'] |                                                  null
+
+(4 rows)
+cqlsh:students> select todo['2022-06-26'] from studentInfo where rollno=1;
+SyntaxException: line 1:11 no viable alternative at input '[' (select [todo][...)
+cqlsh:students> select todo from studentInfo where rollno=1;
+
+ todo
+-------------------------------------------------------
+ {'2022-06-25 18:30:00.000000+0000': 'Internship beg'}
+
+(1 rows)
+cqlsh:students> create table userlogin(userid int,pass text);
+InvalidRequest: Error from server: code=2200 [Invalid query] message="No PRIMARY KEY specifed (exactly one required)"
+cqlsh:students> create table userlogin(userid int,pass text primary key(userid));
+SyntaxException: line 1:55 mismatched input '(' expecting ')' (... int,pass text primary key[(]...)
+cqlsh:students> create table userlogin(userid int primary key,pass text);
+cqlsh:students> describe table userlogin;
+
+CREATE TABLE students.userlogin (
+    userid int PRIMARY KEY,
+    pass text
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:students> insert into userlogin(userid,pass)
+            ... values(1,'infy') sing ttl 40;
+SyntaxException: line 2:17 mismatched input 'sing' expecting EOF (...pass)values(1,'infy') [sing]...)
+cqlsh:students> insert into userlogin(userid,pass) values(1,'infy') using ttl 40;
+cqlsh:students> select * from userlogin ;
+
+ userid | pass
+--------+------
+      1 | infy
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=1;
+
+ ttl(pass)
+-----------
+
+(0 rows)
+cqlsh:students> insert into userlogin(userid,pass) values(2,'infy') using ttl 40;
+cqlsh:students> select ttl(pass) from userlogin where userid=1;
+
+ ttl(pass)
+-----------
+
+(0 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        32
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        30
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        29
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        29
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        27
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        26
+
+(1 rows)
+cqlsh:students> select ttl(pass) from userlogin where userid=2;
+
+ ttl(pass)
+-----------
+        26
+
+(1 rows)
+cqlsh:students>  alter table userlogin alter pass type int;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Altering of types is not allowed"
+cqlsh:students> alter table userlogin drop pass;
+cqlsh:students> describe table userlogin
+
+CREATE TABLE students.userlogin (
+    userid int PRIMARY KEY
+) WITH bloom_filter_fp_chance = 0.01
+    AND caching = {'keys': 'ALL', 'rows_per_partition': 'NONE'}
+    AND comment = ''
+    AND compaction = {'class': 'org.apache.cassandra.db.compaction.SizeTieredCompactionStrategy', 'max_threshold': '32', 'min_threshold': '4'}
+    AND compression = {'chunk_length_in_kb': '64', 'class': 'org.apache.cassandra.io.compress.LZ4Compressor'}
+    AND crc_check_chance = 1.0
+    AND dclocal_read_repair_chance = 0.1
+    AND default_time_to_live = 0
+    AND gc_grace_seconds = 864000
+    AND max_index_interval = 2048
+    AND memtable_flush_period_in_ms = 0
+    AND min_index_interval = 128
+    AND read_repair_chance = 0.0
+    AND speculative_retry = '99PERCENTILE';
+
+cqlsh:students> drop columnfamily userlogin
+            ... ;
+cqlsh:students> show tables;
+Improper show command.
+cqlsh:students> describe tables;
+
+studentinfo
+
+cqlsh:students> exit;
+harish@harish-Vostro-15-3568:~$ cqlsh
+Connected to Test Cluster at 127.0.0.1:9042.
+[cqlsh 5.0.1 | Cassandra 3.11.13 | CQL spec 3.4.4 | Native protocol v4]
+Use HELP for help.
+cqlsh> use student
+   ... ;
+InvalidRequest: Error from server: code=2200 [Invalid query] message="Keyspace 'student' does not exist"
+cqlsh> use students;
+cqlsh:students> select *from studentInfo;
+
+ rollno | doj                             | hobbies      | name           | percentage | subjects                        | todo
+--------+---------------------------------+--------------+----------------+------------+---------------------------------+-------------------------------------------------------
+      1 | 2022-06-14 18:30:00.000000+0000 | {'Football'} |         Harish |         93 | ['Computer Science', 'English'] | {'2022-06-25 18:30:00.000000+0000': 'Internship beg'}
+      2 | 2021-06-14 18:30:00.000000+0000 | {'Football'} | Arish Siddique |       90.5 |                     ['English'] |                                                  null
+      4 | 2023-06-14 18:30:00.000000+0000 |  {'Cricket'} |         Harris |       null |                     ['English'] |                                                  null
+      3 | 2021-06-14 18:30:00.000000+0000 | {'Football'} |          Rohan |       69.5 |                     ['English'] |                                                  null
