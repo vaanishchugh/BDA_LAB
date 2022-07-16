@@ -1,0 +1,139 @@
+Microsoft Windows [Version 10.0.18363.1440]
+(c) 2019 Microsoft Corporation. All rights reserved.
+
+C:\Users\rohit>mongo
+MongoDB shell version v4.4.0
+connecting to: mongodb://127.0.0.1:27017/?compressors=disabled&gssapiServiceName=mongodb
+Implicit session: session { "id" : UUID("aa98301c-16ce-4be3-a660-594f5fa3b3dd") }
+MongoDB server version: 4.4.0
+---
+The server generated these startup warnings when booting:
+        2021-04-01T13:58:56.693+05:30: ***** SERVER RESTARTED *****
+        2021-04-01T13:59:17.824+05:30: Access control is not enabled for the database. Read and write access to data and configuration is unrestricted
+---
+---
+        Enable MongoDB's free cloud-based monitoring service, which will then receive and display
+        metrics about your deployment (disk utilization, CPU, operation statistics, etc).
+
+        The monitoring data will be available on a MongoDB website with a unique URL accessible to you
+        and anyone you share the URL with. MongoDB may use this information to make product
+        improvements and to suggest MongoDB products and deployment options to you.
+
+        To enable free monitoring, run the following command: db.enableFreeMonitoring()
+        To permanently disable this reminder, run the following command: db.disableFreeMonitoring()
+---
+> show dbs
+admin   0.000GB
+config  0.000GB
+local   0.000GB
+
+#database creation
+
+> use student
+switched to db student
+
+#Insertion
+
+> db.student.insert({ rollno:26, name:"rohit", age:20, contact:6362681118, email:"rohit.cs18@bmsce.ac.in" })
+WriteResult({ "nInserted" : 1 })
+> db.student.insert({ rollno:11, name:"ABC", age:21, contact:9916859015, email:"ABC@bmsce.ac.in" })
+WriteResult({ "nInserted" : 1 })
+> db.student.find().pretty()
+{
+        "_id" : ObjectId("60681368d73a05b6786c1b12"),
+        "rollno" : 10,
+        "name" : "rohit",
+        "age" : 20,
+        "contact" : 6362681118,
+        "email" : "rohit.cs18@bmsce.ac.in"
+}
+{
+        "_id" : ObjectId("606813b2d73a05b6786c1b13"),
+        "rollno" : 11,
+        "name" : "ABC",
+        "age" : 21,
+        "contact" : 9916859015,
+        "email" : "ABC@bmsce.ac.in"
+}
+
+#update1
+
+> db.student.update({"rollno":11},{$set:{"name":"FEM"}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.student.find().pretty()
+{
+        "_id" : ObjectId("60681368d73a05b6786c1b12"),
+        "rollno" : 10,
+        "name" : "rohit",
+        "age" : 20,
+        "contact" : 6362681118,
+        "email" : "rohit.cs18@bmsce.ac.in"
+}
+{
+        "_id" : ObjectId("606813b2d73a05b6786c1b13"),
+        "rollno" : 11,
+        "name" : "FEM",
+        "age" : 21,
+        "contact" : 9916859015,
+        "email" : "ABC@bmsce.ac.in"
+}
+
+#update2
+
+> db.student.update({"rollno":11},{$set:{"email":"FEM@bmsce.ac.in"}})
+WriteResult({ "nMatched" : 1, "nUpserted" : 0, "nModified" : 1 })
+> db.student.find().pretty()
+{
+        "_id" : ObjectId("60681368d73a05b6786c1b12"),
+        "rollno" : 10,
+        "name" : "rohit",
+        "age" : 20,
+        "contact" : 6362681118,
+        "email" : "rohit.cs18@bmsce.ac.in"
+}
+{
+        "_id" : ObjectId("606813b2d73a05b6786c1b13"),
+        "rollno" : 11,
+        "name" : "FEM",
+        "age" : 21,
+        "contact" : 9916859015,
+        "email" : "FEM@bmsce.ac.in"
+}
+
+#Exporting into CSV file
+
+C:\Program Files\MongoDB\Tools\100\bin>mongoexport --db=student --collection=student --type=csv --fields=rollno,name,age,contact,email --out=C:\Users\chand\OneDrive\Documents\Downloads\student.csv
+2021-04-03T14:00:39.319+0530    connected to: mongodb://localhost/
+2021-04-03T14:00:39.390+0530    exported 2 records
+
+#drop database
+
+> db.dropDatabase()
+{ "dropped" : "student", "ok" : 1 }
+
+#Importing
+C:\Program Files\MongoDB\Tools\100\bin>mongoimport -d student -c student --type csv --file=C:\Users\chand\OneDrive\Documents\Downloads\student.csv --headerline
+2021-04-03T14:14:35.459+0530    connected to: mongodb://localhost/
+2021-04-03T14:14:36.220+0530    2 document(s) imported successfully. 0 document(s) failed to import.
+
+#After Importing from csv file
+
+> db.dropDatabase()
+{ "dropped" : "student", "ok" : 1 }
+> db.student.find().pretty()
+{
+        "_id" : ObjectId("60682af3f0ae6bce88a27119"),
+        "rollno" : 11,
+        "name" : "FEM",
+        "age" : 21,
+        "contact" : 9916859015,
+        "email" : "FEM@bmsce.ac.in"
+}
+{
+        "_id" : ObjectId("60682af3f0ae6bce88a2711a"),
+        "rollno" : 10,
+        "name" : "rohit",
+        "age" : 20,
+        "contact" : 6362681118,
+        "email" : "rohit.cs18@bmsce.ac.in"
+}
